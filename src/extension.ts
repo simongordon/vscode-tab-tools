@@ -14,16 +14,50 @@ export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
   let disposable = vscode.commands.registerCommand(
     "extension.helloWorld",
-    () => {
+    async () => {
       // The code you place here will be executed every time your command is executed
+
+      // const compareStr = (
+      //   str1: string | undefined = "",
+      //   str2: string | undefined = ""
+      // ) => (str1 === str2 ? 0 : str1 < str2 ? -1 : 1);
 
       // Display a message box to the user
       // vscode.window.activeTextEditor
       // moveActiveEditor
-      vscode.commands.executeCommand("moveActiveEditor", {
-        to: "position",
-        value: 1
+      const currOpen = vscode.window.activeTextEditor!.document;
+      // const g = vscode.window
+      // visibleTextEditors
+      // vscode.workspace.textDocuments
+
+      const sorted = vscode.workspace.textDocuments.sort((a, b) => {
+        const str1 = a.fileName;
+        const str2 = b.fileName;
+        return str1 === str2 ? 0 : str1 < str2 ? -1 : 1;
       });
+
+      console.log(sorted);
+
+      for (let i = 0; i < sorted.length; i++) {
+        await new Promise((resolve, reject) => {
+          const element = sorted[i];
+          vscode.window.showTextDocument(element).then(r => {
+            vscode.commands
+              .executeCommand("moveActiveEditor", {
+                to: "position",
+                value: i
+              })
+              .then(resolve, reject);
+          }, reject);
+        });
+      }
+
+      await vscode.window.showTextDocument(currOpen);
+      // export function showTextDocument(document: TextDocument, column?: ViewColumn, preserveFocus?: boolean): Thenable<TextEditor>;
+
+      // currOpen.document.fileName;
+      // vscode.window.visibleTextEditors[0].document;
+
       vscode.window.showInformationMessage("Hello World!");
     }
   );
